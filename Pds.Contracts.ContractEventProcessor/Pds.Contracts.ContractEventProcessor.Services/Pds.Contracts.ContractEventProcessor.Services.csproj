@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+	</PropertyGroup>
+
+
+	<ItemGroup>
+		<EmbeddedResource Include="DocumentServices\Resources\Aspose.Total.lic" />
+		<EmbeddedResource Include="DocumentServices\Resources\ContractPdf\12345678_Test_v1.pdf" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Remove="DocumentServices\Aspose.Total.lic" />
+		<None Remove="DocumentServices\Resources\ContractPdf\12345678_Test_v1.pdf" />
+		<None Remove="Pds.Contracts.ContractEventProcessor.Services.csproj.transform" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Aspose.PDF" Version="21.3.0" />
+		<PackageReference Include="Azure.Identity" Version="1.13.2" />
+		<PackageReference Include="Microsoft.Azure.ServiceBus" Version="5.1.2" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.13" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.11" />
+		<PackageReference Include="Microsoft.Graph" Version="5.99.0" />
+		<PackageReference Include="Microsoft.SharePointOnline.CSOM" Version="16.1.20211.12000" />
+		<PackageReference Include="Pds.Contracts.Data.Api.Client" Version="0.1.1" />
+		<PackageReference Include="Pds.Core.CodeAnalysis.StyleCop" Version="2.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.11" />
+	</ItemGroup>
+
+</Project>

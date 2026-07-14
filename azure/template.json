@@ -1,0 +1,445 @@
+﻿{
+	"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"resourceEnvironmentName": {
+			"type": "string",
+			"metadata": {
+				"description": "Short name of the environment. Used for the name of resources created."
+			}
+		},
+		"serviceName": {
+			"type": "string",
+			"metadata": {
+				"description": "Short name of the service. Used for the name of resources created."
+			}
+		},
+		"aspSize": {
+			"type": "string",
+			"defaultValue": "1"
+		},
+		"aspInstances": {
+			"type": "int",
+			"defaultValue": 1
+		},
+		"sharedResourceGroupName": {
+			"type": "string"
+		},
+		"sharedAppInsightsName": {
+			"type": "string"
+		},
+		"sharedServiceBusName": {
+			"type": "string"
+		},
+		"servicebusAccessKeyName": {
+			"type": "string",
+			"defaultValue": "RootManagedAccessKey"
+		},
+		"sharedStorageAccountName": {
+			"type": "string"
+		},
+		"sharedKeyVaultName": {
+			"type": "string"
+		},
+		"ActionGroupName": {
+			"type": "string",
+			"defaultValue": ""
+		},
+		"CPUPercentageAlertThreshhold": {
+			"type": "string",
+			"defaultValue": "75"
+		},
+		"MemoryPercentageAlertThreshhold": {
+			"type": "string",
+			"defaultValue": "75"
+		},
+		"AuditApiBaseAddress": {
+			"type": "string"
+		},
+		"AuditApiAzureAdTenant": {
+			"type": "string"
+		},
+		"AuditApiAzureAdClientId": {
+			"type": "string"
+		},
+		"AuditApiAzureAdAppUri": {
+			"type": "string"
+		},
+		"SharepointApiBaseAddress": {
+			"type": "string"
+		},
+		"SharepointApiAuthority": {
+			"type": "string"
+		},
+		"SharepointApiTenant": {
+			"type": "string"
+		},
+		"SharepointApiClientId": {
+			"type": "string"
+		},
+		"SharepointApiAppUri": {
+			"type": "string"
+		},
+		"SharePointApiRelativeSiteUrl": {
+			"type": "string"
+		},
+		"SharepointApiPublicationFolderSuffix": {
+			"type": "string"
+		},
+		"SharepointApiResource": {
+			"type": "string",
+			"defaultValue": "00000003-0000-0ff1-ce00-000000000000"
+		},
+		"SharepointApiAADClientId": {
+			"type": "string",
+			"defaultValue": "defaultValue"
+		},
+		"ContractApiBaseAddress": {
+			"type": "string"
+		},
+		"ContractApiTenantId": {
+			"type": "string"
+		},
+		"ContractApiClientId": {
+			"type": "string"
+		},
+		"ContractApiAppUri": {
+			"type": "string"
+		},
+		"UseSPAzureADAuthentication": {
+			"type": "string",
+			"defaultValue": "false"
+		}
+	},
+	"variables": {
+		"deploymentUrlBase": "https://raw.githubusercontent.com/SkillsFundingAgency/funding-platform-building-blocks/master/templates/",
+		"resourceNamePrefix": "[toLower(concat('pds-', parameters('resourceEnvironmentName'),'-', parameters('serviceName')))]",
+		"functionAppName": "[concat(variables('resourceNamePrefix'), 'wkr-fa')]",
+		"appServicePlanName": "[concat(variables('resourceNamePrefix'), 'wkr-asp')]",
+		"ContractEventQueueName": "[concat('contract-events-sessionqueue-', parameters('resourceEnvironmentName'))]",
+		"EnvironmentToEnableAlertsUpon": [
+			"demo",
+			"oat",
+			"release"
+		],
+		"EnableAlertsAndMetrics": "[contains(variables('EnvironmentToEnableAlertsUpon'), toLower(parameters('resourceEnvironmentName')))]",
+		"AppServicePlanMetricsToAlertUpon": [
+			{
+				"MetricName": "CpuPercentage",
+				"Operator": "GreaterThanOrEqual",
+				"Threshold": "[parameters('CPUPercentageAlertThreshhold')]",
+				"TimeWindow": "PT5M",
+				"Aggregation": "Average"
+			},
+			{
+				"MetricName": "MemoryPercentage",
+				"Operator": "GreaterThanOrEqual",
+				"Threshold": "[parameters('MemoryPercentageAlertThreshhold')]",
+				"TimeWindow": "PT5M",
+				"Aggregation": "Average"
+			}
+		]
+	},
+	"resources": [
+		{
+			"apiVersion": "2017-05-10",
+			"name": "app-service-plan",
+			"type": "Microsoft.Resources/deployments",
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[concat(variables('deploymentUrlBase'),'app-service-plan.json')]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"appServicePlanName": {
+						"value": "[variables('appServicePlanName')]"
+					},
+					"aspSize": {
+						"value": "[parameters('aspSize')]"
+					},
+					"aspInstances": {
+						"value": "[parameters('aspInstances')]"
+					}
+				}
+			}
+		},
+		{
+			"apiVersion": "2017-05-10",
+			"name": "function-app",
+			"type": "Microsoft.Resources/deployments",
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[concat(variables('deploymentUrlBase'),'function-app.json')]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"functionAppName": {
+						"value": "[variables('functionAppName')]"
+					},
+					"appServicePlanName": {
+						"value": "[variables('appServicePlanName')]"
+					},
+					"appServicePlanResourceGroup": {
+						"value": "[resourceGroup().name]"
+					},
+					"functionAppConnectionStrings": {
+						"value": [
+							{
+								"name": "ServiceBusConnection",
+								"connectionString": "[listKeys(resourceId(parameters('sharedResourceGroupName'),'Microsoft.ServiceBus/namespaces/AuthorizationRules',parameters('sharedServiceBusName'), parameters('serviceBusAccessKeyName')),'2015-08-01').primaryConnectionString]",
+								"type": "Custom"
+							}
+						]
+					},
+					"functionAppAppSettings": {
+						"value": [
+							{
+								"name": "Environment",
+								"value": "[parameters('resourceEnvironmentName')]"
+							},
+							{
+								"name": "AzureWebJobsStorage",
+								"value": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('sharedStorageAccountName'),';AccountKey=',listKeys(resourceId(parameters('sharedResourceGroupName'),'Microsoft.Storage/storageAccounts',parameters('sharedStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value, ';EndpointSuffix=core.windows.net')]"
+							},
+							{
+								"name": "FUNCTIONS_EXTENSION_VERSION",
+								"value": "~3"
+							},
+							{
+								"name": "FUNCTIONS_WORKER_RUNTIME",
+								"value": "dotnet"
+							},
+							{
+								"name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+								"value": "[reference(resourceId(parameters('sharedResourceGroupName'), 'microsoft.insights/components', parameters('sharedAppInsightsName')),'2015-05-01').InstrumentationKey]"
+							},
+							{
+								"name": "PdsApplicationInsights:InstrumentationKey",
+								"value": "[reference(resourceId(parameters('sharedResourceGroupName'), 'microsoft.insights/components', parameters('sharedAppInsightsName')),'2015-05-01').InstrumentationKey]"
+							},
+							{
+								"name": "PdsApplicationInsights:Environment",
+								"value": "[parameters('resourceEnvironmentName')]"
+							},
+							{
+								"name": "ContractEventsSessionQueue",
+								"value": "[variables('ContractEventQueueName')]"
+							},
+							{
+								"name": "ContractsDataApiConfiguration:ApiBaseAddress",
+								"value": "[parameters('ContractApiBaseAddress')]"
+							},
+							{
+								"name": "ContractsDataApiConfiguration:Authority",
+								"value": "https://login.microsoftonline.com/"
+							},
+							{
+								"name": "ContractsDataApiConfiguration:TenantId",
+								"value": "[parameters('ContractApiTenantId')]"
+							},
+							{
+								"name": "ContractsDataApiConfiguration:ClientId",
+								"value": "[parameters('ContractApiClientId')]"
+							},
+							{
+								"name": "ContractsDataApiConfiguration:ClientSecret",
+								"value": "[concat('@Microsoft.KeyVault(VaultName=', parameters('sharedKeyVaultName'), ';SecretName=ContractsDataApiClientSecret)')]"
+							},
+							{
+								"name": "ContractsDataApiConfiguration:AppUri",
+								"value": "[parameters('ContractApiAppUri')]"
+							},
+							{
+								"name": "ContractsDataApiConfiguration:ShouldSkipAuthentication",
+								"value": "false"
+							},
+							{
+								"name": "AuditApiClientConfiguration:ApiBaseAddress",
+								"value": "[parameters('AuditApiBaseAddress')]"
+							},
+							{
+								"name": "AuditApiClientConfiguration:Authority",
+								"value": "https://login.microsoftonline.com/"
+							},
+							{
+								"name": "AuditApiClientConfiguration:TenantId",
+								"value": "[parameters('AuditApiAzureAdTenant')]"
+							},
+							{
+								"name": "AuditApiClientConfiguration:ClientId",
+								"value": "[parameters('AuditApiAzureAdClientId')]"
+							},
+							{
+								"name": "AuditApiClientConfiguration:ClientSecret",
+								"value": "[concat('@Microsoft.KeyVault(VaultName=', parameters('sharedKeyVaultName'), ';SecretName=SharedAuditDataApiSecret)')]"
+							},
+							{
+								"name": "AuditApiClientConfiguration:AppUri",
+								"value": "[parameters('AuditApiAzureAdAppUri')]"
+							},
+							{
+								"name": "MaximumDeliveryCount",
+								"value": "9"
+							},
+							{
+								"name": "SPClientServiceConfiguration:ApiBaseAddress",
+								"value": "[parameters('SharepointApiBaseAddress')]"
+							},
+							{
+								"name": "SPClientServiceConfiguration:Authority",
+								"value": "[parameters('SharepointApiAuthority')]"
+							},
+							{
+								"name": "SPClientServiceConfiguration:ClientId",
+								"value": "[parameters('SharepointApiClientId')]"
+							},
+							{
+								"name": "SPClientServiceConfiguration:ClientSecret",
+								"value": "[concat('@Microsoft.KeyVault(VaultName=', parameters('sharedKeyVaultName'), ';SecretName=FcsSharepointApiClientSecret)')]"
+							},
+							{
+								"name": "SPClientServiceConfiguration:TenantId",
+								"value": "[parameters('SharepointApiTenant')]"
+							},
+							{
+								"name": "SPClientServiceConfiguration:AppUri",
+								"value": "[parameters('SharepointApiAppUri')]"
+							},
+							{
+								"name": "SPClientServiceConfiguration:Resource",
+								"value": "[parameters('SharepointApiResource')]"
+							},
+							{
+								"name": "SPClientServiceConfiguration:RelativeSiteURL",
+								"value": "[parameters('SharePointApiRelativeSiteUrl')]"
+							},
+							{
+								"name": "SPClientServiceConfiguration:PublicationFolderSuffix",
+								"value": "[parameters('SharepointApiPublicationFolderSuffix')]"
+							},
+							{
+								"name": "SPClientServiceConfiguration:ShouldErrorPdfNotFound",
+								"value": "true"
+							},
+							{
+								"name": "SPClientServiceConfiguration:AADClientId",
+								"value": "[parameters('SharepointApiAADClientId')]"
+							},
+							{
+								"name": "SPClientServiceConfiguration:AADClientSecret",
+								"value": "[concat('@Microsoft.KeyVault(VaultName=', parameters('sharedKeyVaultName'), ';SecretName=FcsSharepointApiAADClientSecret)')]"
+							},
+							{
+								"name": "FeatureFlag:UseSPAzureADAuthentication",
+								"value": "[parameters('UseSPAzureADAuthentication')]"
+							}
+						]
+					}
+				}
+			},
+			"dependsOn": [
+				"app-service-plan"
+			]
+		},
+		{
+			"apiVersion": "2017-05-10",
+			"name": "[concat(variables('AppServicePlanName'), '-metric-', tolower(variables('AppServicePlanMetricsToAlertUpon')[copyIndex()].MetricName))]",
+			"type": "Microsoft.Resources/deployments",
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[concat(variables('deploymentUrlBase'), 'alert-rules.json')]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"enabled": {
+						"value": "[variables('EnableAlertsAndMetrics')]"
+					},
+					"alertName": {
+						"value": "[concat(variables('AppServicePlanName'), '-metric-', tolower(variables('AppServicePlanMetricsToAlertUpon')[copyIndex()].MetricName))]"
+					},
+					"alertSeverity": {
+						"value": 3
+					},
+					"metricName": {
+						"value": "[variables('AppServicePlanMetricsToAlertUpon')[copyIndex()].MetricName]"
+					},
+					"operator": {
+						"value": "[variables('AppServicePlanMetricsToAlertUpon')[copyIndex()].Operator]"
+					},
+					"threshold": {
+						"value": "[variables('AppServicePlanMetricsToAlertUpon')[copyIndex()].Threshold]"
+					},
+					"aggregation": {
+						"value": "[variables('AppServicePlanMetricsToAlertUpon')[copyIndex()].Aggregation]"
+					},
+					"windowSize": {
+						"value": "[variables('AppServicePlanMetricsToAlertUpon')[copyIndex()].TimeWindow]"
+					},
+					"evaluationFrequency": {
+						"value": "PT1M"
+					},
+					"actionGroupName": {
+						"value": "[parameters('ActionGroupName')]"
+					},
+					"actionGroupResourceGroup": {
+						"value": "[parameters('sharedResourceGroupName')]"
+					},
+					"resourceId": {
+						"value": "[resourceId('Microsoft.Web/serverfarms', variables('AppServicePlanName'))]"
+					}
+				}
+			},
+			"copy": {
+				"name": "AppServicePlanMetricCopy",
+				"count": "[length(variables('AppServicePlanMetricsToAlertUpon'))]"
+			},
+			"dependsOn": [
+				"app-service-plan"
+			]
+		},
+		{
+			"apiVersion": "2017-05-10",
+			"name": "[concat('pds-', parameters('resourceEnvironmentName'), '-contract-processor-failed-func')]",
+			"type": "Microsoft.Resources/deployments",
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[concat(variables('deploymentUrlBase'), 'alert-rules-app-insights-query.json')]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"enabled": {
+						"value": "[variables('EnableAlertsAndMetrics')]"
+					},
+					"alertName": {
+						"value": "[concat('pds-', parameters('resourceEnvironmentName'), '-contracts-processor-failed-func')]"
+					},
+					"query": {
+						"value": "requests | where name==\"ContractEventProcessorFunction\" | where success == false"
+					},
+					"actionGroupResourceGroup": {
+						"value": "[parameters('sharedResourceGroupName')]"
+					},
+					"actionGroupName": {
+						"value": "[parameters('ActionGroupName')]"
+					},
+					"appInsightsResourceGroup": {
+						"value": "[parameters('sharedResourceGroupName')]"
+					},
+					"appInsightsName": {
+						"value": "[parameters('sharedAppInsightsName')]"
+					}
+				}
+			}
+		}
+	],
+	"outputs": {
+		"FunctionAppName": {
+			"type": "string",
+			"value": "[variables('functionAppName')]"
+		}
+	}
+}

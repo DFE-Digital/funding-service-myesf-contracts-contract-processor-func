@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "Pds.Contracts.ContractEventProcessor.Func": {
+      "commandName": "Project",
+      "commandLineArgs": "host start --pause-on-error --port 5800"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "httpPort": 30170,
+      "useSSL": false
+    }
+  }
+}
