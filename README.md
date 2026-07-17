@@ -1,113 +1,170 @@
 # Manage your education and skills funding - Contracts (change events) processor
 
-## Introduction
+The Manage Your Education and Skills Funding (MYESF) Contracts Events Processor is used by the MYESF web application to allow the following:
 
-Contracts processor is a serverless azure function that process contract change events based on atom feed, that is produced by the [feed processor](https://github.com/SkillsFundingAgency/pds-contracts-func-feed-processor). This function is a service bus triggered function, with session enabled for orderly processing of contract events.
+- Retrieval of changes of contract status from the Funding Contract Service (FCS)
+- Sending such data to the Contracts Data API
+- Retrieval of documents from a Sharepoint library
 
-### Getting Started
+## Provider
 
-This product is a Visual Studio 2019 solution containing several projects (Azure function application and service layers, with associated unit test and integration test projects).
-To run this product locally, you will need to configure the list of dependencies, once configured and the configuration files updated, it should be F5 to run and debug locally.
+[The Department for Education](https://www.gov.uk/government/organisations/department-for-education)
 
-### Installing
+## About this project
 
-Clone the project and open the solution in Visual Studio 2019.
+This project is an ASP.NET Core 3.1 function app utilising Azure App Service for deployment.
 
-#### List of dependencies
+The function app runs on an Azure App service on Azure.
 
-|Item |Purpose|
-|-------|-------|
-|Azure Storage Emulator| The Microsoft Azure Storage Emulator is a tool that emulates the Azure Blob, Queue, and Table services for local development purposes. This is required for webjob storage used by azure functions.|
-|Azure function development tools | To run and test azure functions locally. |
-|Azure service bus | When the feeds are processed, a message will be created for the contract processor to continue processing of contract events. Service bus cannot be set up locally, you will need an azure subscription to set-up. |
-|Contracts API | API for managing contracts. |
-|SharePoint Online document library | Where the contract document can be found (internal only). |
+It is a serverless azure function that processes contract change events based on an atom feed, that is produced by the [feed processor](https://github.com/DFE-Digital/funding-service-myesf-contracts-feed-processor-func). It is triggerd by a service bus message, with sessions enabled for orderly processing of contract events.
 
-#### Azure Storage Emulator
+As part of the contract creation process, it also requests contract documents from the Sharepoint client service that accesses a Sharepoint library, then calls the contract data API to request a contract to be created.
 
-The Storage Emulator is available as part of the Microsoft Azure SDK. Azure functions require it for local development.
+**Note:** The project is currently being updated to be containerised via Docker where the deployment method and target will change, this document will be updated when these changes have been finalised.
 
-#### Azure function development tools
+# Local Configuration Guide
 
-You can use your favourite code editor and development tools to create and test functions on your local computer.
-We used visual studio and Azure core tools CLI for development and testing. You can find more information for your favourite code editor at <https://docs.microsoft.com/en-us/azure/azure-functions/functions-develop-local>.
+In order to run the application locally a valid `local.settings.json` file will need to be created in the Pds.Contracts.ContractEventProcessor.Func project. Below, and included in the repo, there is an `appsettings.example.json` which can be used as a base and populated with the required values, which can be retrieved from the Azure Portal.
 
-* Using Visual Studio - To develop functions using visual studio, include the Azure development workload in your Visual Studio installation. More detailed information can be found at <https://docs.microsoft.com/en-us/azure/azure-functions/functions-develop-vs>.
-* Azure Functions Core Tools - These tools provide CLI with core runtime and templates for creating functions, which can be used to develop and run functions without visual studio. This can be installed using package managers like `npm` or `chocolately` more detailed information can be found at <https://www.npmjs.com/package/azure-functions-core-tools>.
-
-#### Azure service bus
-
-Microsoft Azure Service Bus is a fully managed enterprise message broker.
-Publish-subscribe topics are used by this application to decouple approval processing.
-There are no emulators available for azure service bus, hence you will need an azure subscription and set-up a service bus namesapce with a topic created to run this application.
-Once you have set-up an azure service bus namespace, you will need to create a shared access policy to set in local configuration settings.
-
-#### Contracts API
-
-Contract API can be found at <https://github.com/SkillsFundingAgency/pds-contracts-data-api>.
-
-#### SharePoint Online document library
-
-You can configure any SharePoint online document library, and register an app to create an oauth client credentials. This can then be added to the config to access documents from library.
-
-### Local Config Files
-
-Once you have cloned the public repo you need the following configuration files listed below.
-
-| Location | config file |
-|-------|-------|
-| Pds.Contracts.ContractEventProcessor.Func | local.settings.json |
-
-The following is a sample configuration file
+## Application Settings (`appsettings.json`)
 
 ```json
 {
   "IsEncrypted": false,
-  "version": "2.0",
+  "Version": "2.0",
   "Values": {
+    "ServiceBusConnection": "",
+    "Environment": "local",
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "AzureWebJobsDashboard": "UseDevelopmentStorage=true",
+    "FUNCTIONS_EXTENSION_VERSION": "~3",
     "FUNCTIONS_WORKER_RUNTIME": "dotnet",
-    "ContractEventsSessionQueue": "replace_QueueName",
-    "ServiceBusConnection": "replace_ServiceBusConnectionString",
-
-    "MaximumDeliveryCount": 10,
-
-    "SPClientServiceConfiguration:ApiBaseAddress": "replace_sharepoint_online_baseaddress",
+    "APPINSIGHTS_INSTRUMENTATIONKEY": "",
+    "PdsApplicationInsights:InstrumentationKey": "",
+    "PdsApplicationInsights:Environment": "local",
+    "ContractEventsSessionQueue": "",
+    "ContractsDataApiConfiguration:ApiBaseAddress": "",
+    "ContractsDataApiConfiguration:Authority": "https://login.microsoftonline.com/",
+    "ContractsDataApiConfiguration:TenantId": "",
+    "ContractsDataApiConfiguration:ClientId": "",
+    "ContractsDataApiConfiguration:ClientSecret": "",
+    "ContractsDataApiConfiguration:AppUri": "",
+    "ContractsDataApiConfiguration:ShouldSkipAuthentication": false,
+    "AuditApiConfiguration:ApiBaseAddress": "",
+    "AuditApiConfiguration:Authority": "https://login.microsoftonline.com/",
+    "AuditApiConfiguration:TenantId": "",
+    "AuditApiConfiguration:ClientId": "",
+    "AuditApiConfiguration:ClientSecret": "",
+    "AuditApiConfiguration:AppUri": "",
+    "MaximumDeliveryCount": 9,
+    "SPClientServiceConfiguration:ApiBaseAddress": "",
     "SPClientServiceConfiguration:Authority": "https://accounts.accesscontrol.windows.net/",
-    "SPClientServiceConfiguration:ClientId": "replace_clientid_guid",
-    "SPClientServiceConfiguration:ClientSecret": "replace_clientsecret",
-    "SPClientServiceConfiguration:TenantId": "replace_tenantid",
-    "SPClientServiceConfiguration:AppUri": "replace_sharepoint_host",
-    "SPClientServiceConfiguration:Resource": "replace_app_resouce_id",
-    "SPClientServiceConfiguration:RelativeSiteURL": "replace_relative_siteurl",
-    "SPClientServiceConfiguration:PublicationFolderSuffix": "replace_document_library_name",
-    "SPClientServiceConfiguration:ShouldErrorPdfNotFound": true_or_false
-  },
-
-  "ContractsDataApiConfiguration": {
-    "ApiBaseAddress": "replace_local_contract_api_or_stub",
-    "ShouldSkipAuthentication": "true"
-    },
+    "SPClientServiceConfiguration:ClientId": "",
+    "SPClientServiceConfiguration:ClientSecret": "",
+    "SPClientServiceConfiguration:TenantId": "",
+    "SPClientServiceConfiguration:AppUri": "",
+    "SPClientServiceConfiguration:Resource": "00000003-0000-0ff1-ce00-000000000000",
+    "SPClientServiceConfiguration:RelativeSiteURL": "",
+    "SPClientServiceConfiguration:PublicationFolderSuffix": "",
+    "SPClientServiceConfiguration:ShouldErrorPdfNotFound": true,
+    "SPClientServiceConfiguration:AADClientId": "",
+    "SPClientServiceConfiguration:AADClientSecret": "",
+    "FeatureFlag:UseSPAzureADAuthentication": false,
+    "WEBSITE_ENABLE_SYNC_UPDATE_SITE": true,
+    "WEBSITE_RUN_FROM_PACKAGE": 1
+  }
 }
 ```
 
-The following configurations need to be replaced with your values.
-|Key|Token|Example|
-|-|-|-|
-|SPClientServiceConfiguration.ApiBaseAddress|replace_sharepoint_online_baseaddress|<http://localhost:5001>|
-|SPClientServiceConfiguration.ClientId|replace_clientid_guid|A valid guid.|
-|SPClientServiceConfiguration.ClientSecret|replace_clientsecret|Any string.|
-|SPClientServiceConfiguration.TenantId|replace_tenantid|SharePoint online tenant id.|
-|SPClientServiceConfiguration.AppUri|replace_sharepoint_host|A SharePoint hostname e.g. fabrikam.sharepoint.com|
-|SPClientServiceConfiguration.Resource|replace_app_resouce_id|SharePoint Online application principal ID.|
-|SPClientServiceConfiguration.RelativeSiteURL|replace_relative_siteurl|/sites/contoso|
-|SPClientServiceConfiguration.PublicationFolderSuffix|replace_document_library_name|This is suffix of document library, see `GetFolderNameForContractDocument` method of [ContractEventMapper.cs](Pds.Contracts.ContractEventProcessor\Pds.Contracts.ContractEventProcessor.Services\Implementations\ContractEventMapper.cs) for document library format. |
-|SPClientServiceConfiguration.ShouldErrorPdfNotFound|true_or_false|`false` to continue with a dummy contract document, you still need to ensure a valid SharePoint access token can be created.|
-|AuditApiConfiguration.ApiBaseAddress|replace_local_audit_api_or_stub|<http://localhost:5002/>|
-|ServiceBusConnectionString|replace_ServiceBusConnectionString|A valid azure service bus connection string|
-|ContractEventsSessionQueue|replace_QueueName|atom-feed-queue|
-|ContractsDataApiConfiguration.ApiBaseAddress|replace_local_contract_api_or_stub|<http://localhost:5002>|
+### Setting Details
 
+- **`AzureWebJobsStorage`**
+  The core application setting used by the Azure Functions and Azure WebJobs runtime to establish a connection to an Azure Storage account.
+
+- **`FUNCTIONS_EXTENSION_VERSION`**      
+  The functions extension version number.
+
+- **`FUNCTIONS_WORKER_RUNTIME`**
+  The functions runtime mode.
+
+- **`PdsApplicationInsights:InstrumentationKey`**  
+  The key value for Application Insights resource for logging purposes.
+   
+- **`PdsApplicationInsights:Environment`**  
+  The environment which the app is running on for Application Insights for logging purposes.
+ 
+- **`ContractsDataApiConfiguration:ApiBaseAddress`** 
+  The base URL endpoint used by a client application to route network requests to the Contracts Data API backend.
+
+- **`ContractsDataApiConfiguration:Authority`** 
+  The base URL of the Identity Provider responsible for authenticating and issuing tokens for the Contracts Data API client.
+
+- **`ContractsDataApiConfiguration:TenantId`** 
+  The unique identifier for your azure ad tenant.
+
+- **`ContractsDataApiConfiguration:ClientId`** 
+  The Contracts Data API application (client) ID registered in azure ad.
+
+- **`ContractsDataApiConfiguration:ClientSecret`** 
+  The confidential credential used by the Contracts Data API application to securely prove its identity to the Identity Provider.
+
+- **`ContractsDataApiConfiguration:AppUri`** 
+  The unique Application ID URI used as the identifier for the protected Contracts Data API resource within the Identity Provider.
+
+- **`AuditApiConfiguration:ApiBaseAddress`** 
+  The base URL endpoint used by a client application to route network requests to the Audit API backend.
+
+- **`AuditApiConfiguration:Authority`** 
+  The base URL of the Identity Provider responsible for authenticating and issuing tokens for the Audit API client.
+
+- **`AuditApiConfiguration:TenantId`** 
+  The unique identifier for your azure ad tenant.
+
+- **`AuditApiConfiguration:ClientId`** 
+  The Audit API application (client) ID registered in azure ad.
+
+- **`AuditApiConfiguration:ClientSecret`** 
+  The confidential credential used by the Audit API application to securely prove its identity to the Identity Provider.
+
+- **`AuditApiConfiguration:AppUri`** 
+  The unique Application ID URI used as the identifier for the protected Audit API resource within the Identity Provider.
+
+- **`SPClientServiceConfiguration:ApiBaseAddress`**
+  The base URL endpoint used by a client application to route network requests to the Sharepoint Client Service.
+
+- **`SPClientServiceConfiguration:Authority`**
+  The base URL of the Identity Provider responsible for authenticating and issuing tokens for the Sharepoint Client Service.
+
+- **`SPClientServiceConfiguration:ClientId`** 
+  The Sharepoint Client Service (client) ID registered in azure ad.
+
+- **`SPClientServiceConfiguration:ClientSecret`** 
+  The confidential credential used by the Sharepoint Client Service to securely prove its identity to the Identity Provider.
+
+- **`SPClientServiceConfiguration:TenantId`** 
+  The unique identifier for your azure ad tenant.
+
+- **`SPClientServiceConfiguration:AppUri`** 
+  The unique Application ID URI used as the identifier for the protected the Sharepoint Client Service resource within the Identity Provider.
+
+- **`SPClientServiceConfiguration:RelativeSiteURL`** 
+  The relative URL for the Sharepoint site.
+
+- **`SPClientServiceConfiguration:PublicationFolderSuffix`** 
+  The suffix at the end of the name of each document library folder in the Sharepoint library.
+
+- **`SPClientServiceConfiguration:ShouldErrorPdfNotFound`** 
+  Determines if an error should be thrown if a Pdf is not found in the Sharepoint library.
+
+- **`SPClientServiceConfiguration:AADClientId`** 
+  The SharePoint Graph Client Service (client) ID registered in azure ad.
+
+- **`SPClientServiceConfiguration:AADClientSecret`** 
+  The confidential credential used by the SharePoint Graph Client Service to securely prove its identity to the Identity Provider.
+
+- **`FeatureFlag:UseSPAzureADAuthentication`** 
+  Determines whether to use SharePoint Graph Client Service.
+ 
 ## Build and Test
 
 This API is built using
@@ -115,7 +172,7 @@ This API is built using
 * Microsoft Visual Studio 2019
 * .Net Core 3.1
 
-To build and test locally, you can either use visual studio 2019 or VSCode or simply use dotnet CLI `dotnet build` and `dotnet test` more information in dotnet CLI can be found at <https://docs.microsoft.com/en-us/dotnet/core/tools/>.
+To build and test locally, you can either use Visual Studio 2019 or Visual Studio Code or simply use dotnet CLI `dotnet build` and `dotnet test` more information in dotnet CLI can be found at <https://docs.microsoft.com/en-us/dotnet/core/tools/>.
 
 ## Contribute
 
