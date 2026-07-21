@@ -1,9 +1,11 @@
-# Manage your education and skills funding - Contracts (change events) processor
+# Manage Your Education and Skills Funding Contracts Events Processor
 
 The Manage Your Education and Skills Funding (MYESF) Contracts Events Processor is used by the MYESF web application to allow the following:
 
-- Retrieval of changes of contract status from the Funding Contract Service (FCS)
-- Sending such data to the Contracts Data API
+- Processing of contract events from the Funding Contract Service (FCS). This includes:
+  - Contract creation
+  - Contract amendment
+  - Contract withdrawal
 - Retrieval of documents from a Sharepoint library
 
 ## Provider
@@ -16,7 +18,7 @@ This project is an ASP.NET Core 3.1 function app utilising Azure App Service for
 
 The function app runs on an Azure App service on Azure.
 
-It is a serverless azure function that processes contract change events based on an atom feed, that is produced by the [feed processor](https://github.com/DFE-Digital/funding-service-myesf-contracts-feed-processor-func). It is triggerd by a service bus message, with sessions enabled for orderly processing of contract events.
+It is a serverless azure function that processes contract change events based on an atom feed, that is produced by the [Contract Feed Processor](https://github.com/DFE-Digital/funding-service-myesf-contracts-feed-processor-func). It is triggerd by a service bus message, with sessions enabled for orderly processing of contract events.
 
 As part of the contract creation process, it also requests contract documents from the Sharepoint client service that accesses a Sharepoint library, then calls the contract data API to request a contract to be created.
 
@@ -24,14 +26,13 @@ As part of the contract creation process, it also requests contract documents fr
 
 # Local Configuration Guide
 
-In order to run the application locally a valid `local.settings.json` file will need to be created in the Pds.Contracts.ContractEventProcessor.Func project. Below, and included in the repo, there is an `appsettings.example.json` which can be used as a base and populated with the required values, which can be retrieved from the Azure Portal.
+In order to run the application locally a valid `local.settings.json` file will need to be created in the `Pds.Contracts.ContractEventProcessor.Func` project. Below, and included in the repo, there is an `local.settings.example.json` which can be used as a base and populated with the required values, which can be retrieved from the Azure Portal.
 
-## Application Settings (`appsettings.json`)
+## Application Settings (`local.settings.json`)
 
 ```json
 {
   "IsEncrypted": false,
-  "Version": "2.0",
   "Values": {
     "ServiceBusConnection": "",
     "Environment": "local",
@@ -39,7 +40,6 @@ In order to run the application locally a valid `local.settings.json` file will 
     "AzureWebJobsDashboard": "UseDevelopmentStorage=true",
     "FUNCTIONS_EXTENSION_VERSION": "~3",
     "FUNCTIONS_WORKER_RUNTIME": "dotnet",
-    "APPINSIGHTS_INSTRUMENTATIONKEY": "",
     "PdsApplicationInsights:InstrumentationKey": "",
     "PdsApplicationInsights:Environment": "local",
     "ContractEventsSessionQueue": "",
@@ -63,15 +63,13 @@ In order to run the application locally a valid `local.settings.json` file will 
     "SPClientServiceConfiguration:ClientSecret": "",
     "SPClientServiceConfiguration:TenantId": "",
     "SPClientServiceConfiguration:AppUri": "",
-    "SPClientServiceConfiguration:Resource": "00000003-0000-0ff1-ce00-000000000000",
+    "SPClientServiceConfiguration:Resource": "",
     "SPClientServiceConfiguration:RelativeSiteURL": "",
     "SPClientServiceConfiguration:PublicationFolderSuffix": "",
     "SPClientServiceConfiguration:ShouldErrorPdfNotFound": true,
     "SPClientServiceConfiguration:AADClientId": "",
     "SPClientServiceConfiguration:AADClientSecret": "",
-    "FeatureFlag:UseSPAzureADAuthentication": false,
-    "WEBSITE_ENABLE_SYNC_UPDATE_SITE": true,
-    "WEBSITE_RUN_FROM_PACKAGE": 1
+    "FeatureFlag:UseSPAzureADAuthentication": true
   }
 }
 ```
@@ -167,16 +165,11 @@ In order to run the application locally a valid `local.settings.json` file will 
  
 ## Build and Test
 
-This API is built using
-
-* Microsoft Visual Studio 2019
-* .Net Core 3.1
-
-To build and test locally, you can either use Visual Studio 2019 or Visual Studio Code or simply use dotnet CLI `dotnet build` and `dotnet test` more information in dotnet CLI can be found at <https://docs.microsoft.com/en-us/dotnet/core/tools/>.
+To build and test locally, you can either use Visual Studio, Visual Studio Code or simply use dotnet CLI `dotnet build` and `dotnet test` more information in dotnet CLI can be found at <https://docs.microsoft.com/en-us/dotnet/core/tools/>.
 
 ## Contribute
 
 To contribute,
 
-* If you are part of the team then create a branch for changes and then submit your changes for review by creating a pull request.
-* If you are external to the organisation then fork this repository and make necessary changes and then submit your changes for review by creating a pull request.
+- If you are part of the team then create a branch for changes and then submit your changes for review by creating a pull request.
+- If you are external to the organisation then fork this repository and make necessary changes and then submit your changes for review by creating a pull request.

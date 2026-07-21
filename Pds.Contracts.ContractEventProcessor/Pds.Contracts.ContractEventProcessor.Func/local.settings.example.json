@@ -1,6 +1,5 @@
 {
   "IsEncrypted": false,
-  "Version": "2.0",
   "Values": {
     "ServiceBusConnection": "",
     "Environment": "local",
@@ -8,7 +7,6 @@
     "AzureWebJobsDashboard": "UseDevelopmentStorage=true",
     "FUNCTIONS_EXTENSION_VERSION": "~3",
     "FUNCTIONS_WORKER_RUNTIME": "dotnet",
-    "APPINSIGHTS_INSTRUMENTATIONKEY": "",
     "PdsApplicationInsights:InstrumentationKey": "",
     "PdsApplicationInsights:Environment": "local",
     "ContractEventsSessionQueue": "",
@@ -32,14 +30,12 @@
     "SPClientServiceConfiguration:ClientSecret": "",
     "SPClientServiceConfiguration:TenantId": "",
     "SPClientServiceConfiguration:AppUri": "",
-    "SPClientServiceConfiguration:Resource": "00000003-0000-0ff1-ce00-000000000000",
+    "SPClientServiceConfiguration:Resource": "",
     "SPClientServiceConfiguration:RelativeSiteURL": "",
     "SPClientServiceConfiguration:PublicationFolderSuffix": "",
     "SPClientServiceConfiguration:ShouldErrorPdfNotFound": true,
     "SPClientServiceConfiguration:AADClientId": "",
     "SPClientServiceConfiguration:AADClientSecret": "",
-    "FeatureFlag:UseSPAzureADAuthentication": false,
-    "WEBSITE_ENABLE_SYNC_UPDATE_SITE": true,
-    "WEBSITE_RUN_FROM_PACKAGE": 1
+    "FeatureFlag:UseSPAzureADAuthentication": true
   }
 }
