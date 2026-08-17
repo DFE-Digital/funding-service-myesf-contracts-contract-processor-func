@@ -20,7 +20,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-	  <PackageReference Include="Pds.Contracts.Data.Api.Client" Version="0.1.1" />
+	  <PackageReference Include="Pds.Contracts.Data.Api.Client" Version="0.1.3" />
     <PackageReference Include="Pds.Core.CodeAnalysis.StyleCop" Version="2.0.0" />
     <PackageReference Include="RichardSzalay.MockHttp" Version="6.0.0" />
   </ItemGroup>

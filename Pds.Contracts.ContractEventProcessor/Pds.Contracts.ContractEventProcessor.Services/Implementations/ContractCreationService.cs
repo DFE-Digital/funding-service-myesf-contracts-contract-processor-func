@@ -58,7 +58,7 @@ namespace Pds.Contracts.ContractEventProcessor.Services.Implementations
             _logger.LogInformation($"[{nameof(CreateAsync)}] - Processing message for contract creation. ContractNumber: {contractEvent.ContractNumber}, ContractVersion: {contractEvent.ContractVersion}");
 
             var createRequest = _contractEventMapper.GetCreateRequest(contractEvent);
-            var fileName = _contractEventMapper.GetFileNameForContractDocument(contractEvent.UKPRN, contractEvent.ContractNumber, contractEvent.ContractVersion);
+            var fileName = _contractEventMapper.GetFileNameForContractDocument(contractEvent.Ukprn, contractEvent.ContractNumber, contractEvent.ContractVersion);
             var folderName = _contractEventMapper.GetFolderNameForContractDocument(contractEvent.FundingType.GetEnumShortName(), contractEvent.ContractPeriodValue, _spConfig.PublicationFolderSuffix);
             var pdfDoc = await _sharePointClientService.GetDocument(fileName, folderName);
             var pdfADoc = _documentManagementService.ConvertToPdfA(pdfDoc);

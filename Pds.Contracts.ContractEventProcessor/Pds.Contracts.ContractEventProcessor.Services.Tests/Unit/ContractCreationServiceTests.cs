@@ -228,7 +228,7 @@ namespace Pds.Contracts.ContractEventProcessor.Services.Tests.Unit
             contractEvent.FundingType = ContractFundingType.Levy;
             contractEvent.ParentContractNumber = "Test123";
             contractEvent.StartDate = DateTime.Now;
-            contractEvent.UKPRN = 12345678;
+            contractEvent.Ukprn = 12345678;
             contractEvent.Value = 99999;
             contractEvent.ContractEventXml = "sample-blob-file.xml";
             contractEvent.ContractPeriodValue = "1799";

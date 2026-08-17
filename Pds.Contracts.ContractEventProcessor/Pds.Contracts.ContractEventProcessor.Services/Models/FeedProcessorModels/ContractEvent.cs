@@ -17,9 +17,9 @@ namespace Pds.Contracts.ContractEventProcessor.Services.Models
         public Guid BookmarkId { get; set; }
 
         /// <summary>
-        /// Gets or sets the UKPRN.
+        /// Gets or sets the Ukprn.
         /// </summary>
-        public int UKPRN { get; set; }
+        public int Ukprn { get; set; }
 
         /// <summary>
         /// Gets or sets the contract number.
