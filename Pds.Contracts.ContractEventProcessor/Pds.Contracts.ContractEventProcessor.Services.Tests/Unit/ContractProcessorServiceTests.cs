@@ -404,7 +404,7 @@ namespace Pds.Contracts.ContractEventProcessor.Services.Tests.Unit
             contractEvent.FundingType = ContractFundingType.Levy;
             contractEvent.ParentContractNumber = "Test123";
             contractEvent.StartDate = new DateTime(2021, 4, 1);
-            contractEvent.UKPRN = 12345678;
+            contractEvent.Ukprn = 12345678;
             contractEvent.Value = 99999;
             contractEvent.ContractEventXml = "sample-blob-file.xml";
             contractEvent.ContractPeriodValue = "1799";
@@ -429,7 +429,7 @@ namespace Pds.Contracts.ContractEventProcessor.Services.Tests.Unit
                 FundingType = Data.Api.Client.Enumerations.ContractFundingType.Levy,
                 ParentContractNumber = "Test123",
                 StartDate = new DateTime(2021, 4, 1),
-                UKPRN = 12345678,
+                Ukprn = 12345678,
                 Value = 99999,
                 ContractData = "sample-blob-file.xml",
                 Title = $"Apprenticeship agreement {DateTime.Now.ToFullMonthAndFullYearDisplay()} version 1",

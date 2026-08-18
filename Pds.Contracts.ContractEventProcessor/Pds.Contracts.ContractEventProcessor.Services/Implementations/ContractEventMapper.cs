@@ -42,7 +42,7 @@ namespace Pds.Contracts.ContractEventProcessor.Services.Implementations
                 createRequest.FundingType = (Data.Api.Client.Enumerations.ContractFundingType)contractEvent.FundingType;
                 createRequest.ParentContractNumber = contractEvent.ParentContractNumber;
                 createRequest.StartDate = contractEvent.StartDate;
-                createRequest.UKPRN = contractEvent.UKPRN;
+                createRequest.Ukprn = contractEvent.Ukprn;
                 createRequest.Value = contractEvent.Value;
                 createRequest.ContractData = contractEvent.ContractEventXml;
                 createRequest.Title = contractTitle;
