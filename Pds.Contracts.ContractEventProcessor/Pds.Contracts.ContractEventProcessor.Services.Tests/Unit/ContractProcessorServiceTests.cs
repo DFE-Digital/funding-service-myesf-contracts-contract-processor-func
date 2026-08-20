@@ -114,6 +114,8 @@ namespace Pds.Contracts.ContractEventProcessor.Services.Tests.Unit
         [DataRow(ContractFundingType.Levy, 2, "2526", "Apprenticeship agreement {MonthYear} version 2", TemplateType.MonthYear)]
         [DataRow(ContractFundingType.TakingTeachingFurtherYear2, 1, "2526", "Taking teaching further contract for 2025 to 2026 version 1")]
         [DataRow(ContractFundingType.TakingTeachingFurtherYear2, 2, "2526", "Taking teaching further contract variation for 2025 to 2026 version 2")]
+        [DataRow(ContractFundingType.TakingTeachingFurtherYear2, 1, "2627", "Taking teaching further contract for 2026 to 2027 version 1")]
+        [DataRow(ContractFundingType.TakingTeachingFurtherYear2, 2, "2627", "Taking teaching further contract variation for 2026 to 2027 version 2")]
         [DataRow(ContractFundingType.ConstructionTechnicalExcellenceColleges, 1, "2526", "Construction Technical Excellence Colleges - revenue contract for 2025 to 2026 version 1")]
         [DataRow(ContractFundingType.ConstructionTechnicalExcellenceColleges, 2, "2526", "Construction Technical Excellence Colleges - revenue contract for 2025 to 2026 version 2")]
         [DataRow(ContractFundingType.ConstructionSkillsPackageIndustryPlacementsFund, 1, "2627", "Construction Skills Package: Industry Placements Fund contract for 2026 to 2027 version 1")]
